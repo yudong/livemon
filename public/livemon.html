@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+       #map {
+        height: 720px;
+        width: 100%;
+       }
+    </style>
+  </head>
+  <body>
+    <h3>BDV Clarity Installs Live Monitoring</h3>
+    <div id="map"></div>
+    <script>
+      function initMap() {
+
+         //Chicago
+        //var centerUs = {lat: 41.850033, lng: -87.6500523};
+
+        var centerUs = {lat: 37.09024, lng: -95.712891};
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 5,
+          center: centerUs
+        });
+
+        var installs = [
+          {
+            label: "Pt Richmond",
+            cord: {lat: 37.924046, lng: -122.379762 },
+            vpn: "site-to-site",
+            error: false, 
+            url: "http://clarity.blackdiamondvideo.com", 
+            ORs: [
+                {name: 'OR1', ip: '192.168.10.1'},
+                {name: 'OR2', ip: '192.168.10.2'},
+                {name: 'OR3', ip: '192.168.10.3'},
+                {name: 'OR4', ip: '192.168.10.4'}
+              ]
+          },
+
+          {
+            label: "mgh",
+            cord: {lat: 42.363154, lng: -71.068833 },
+            vpn: "secure-link",
+            error: false, 
+            url: "http://mgh.bdv.partners.org", 
+          },
+
+           {
+            label: "ccf",
+            cord: {lat: 41.502321, lng: -81.617721 },
+            vpn: "secure-link",
+            error: false, 
+            url: "http://192.168.123.123", 
+          },
+
+          {
+            label: "upen",
+            cord: {lat:39.949968, lng: -75.193004 },
+            vpn: "site-to-site",
+            error: false, 
+            url: "http://10.10.10.1", 
+          },
+
+          {
+            label: "ucla",
+            cord: {lat: 34.066449, lng: -118.446332},
+            vpn: "site-to-site",
+            error: true, 
+            url: "http://10.20.30.40", 
+          },
+
+          {
+            label: "bjc",
+            cord: {lat: 38.635234, lng: -90.264865},
+            vpn: "no",
+            error: false, 
+            url: "http://20.30.40.50", 
+          },
+
+          {
+            label: "bwh",
+            cord: {lat: 42.336089, lng: -71.106707},
+            vpn: "site-to-site",
+            error: true,
+            url: "http://20.30.40.50", 
+          }
+
+        ];
+
+        var infoWindow = new google.maps.InfoWindow;
+
+        var markers = installs.map(function(install) {
+          if (install.vpn == "site-to-site"){
+            if (install.error){
+              url_icon = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
+            } else {
+              url_icon = 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
+            }
+          } else {
+            url_icon = 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png'
+          }
+
+
+          var marker = new google.maps.Marker({
+            map: map,
+            position: install.cord,
+            icon: url_icon
+          });
+
+          marker.addListener("click", function(){
+            infoWindow.setContent(infoWindowMaker(install));
+            infoWindow.open(map, marker);
+          });
+        });
+
+      
+        function infoWindowMaker(ins) {
+          var infowincontent = document.createElement('div');
+
+          var site = document.createElement('strong');
+          site.textContent = "Site: ";
+          infowincontent.appendChild(site);
+
+          var siteName = document.createElement('text');
+          siteName.textContent = ins.label;
+          infowincontent.appendChild(siteName);
+          infowincontent.appendChild(document.createElement('br'));
+
+          infowincontent.appendChild(document.createElement('hr'));
+
+          var vpn = document.createElement('strong');
+          vpn.textContent = "VPN: ";
+          infowincontent.appendChild(vpn);
+
+          var vpnType = document.createElement('text');
+          vpnType.textContent = ins.vpn;
+          infowincontent.appendChild(vpnType);
+          infowincontent.appendChild(document.createElement('br'));
+
+          infowincontent.appendChild(document.createElement('hr'));
+
+          var clarity = document.createElement('strong');
+          clarity.textContent = "Clarity: ";
+          infowincontent.appendChild(clarity);
+
+          var clarityStatus = document.createElement('span');
+          clarityStatus.innerHTML= "status ";
+          infowincontent.appendChild(clarityStatus);
+
+          var sshLink = document.createElement('a');
+          sshLink.setAttribute('href', ins.url);
+          sshLink.innerHTML= "ssh ";
+          infowincontent.appendChild(sshLink);
+
+          var webLink = document.createElement('a');
+          webLink.setAttribute('href', ins.url);
+          webLink.innerHTML= "web";
+          infowincontent.appendChild(webLink);
+          infowincontent.appendChild(document.createElement('br'));
+
+          infowincontent.appendChild(document.createElement('hr'));
+          var avcx = document.createElement('strong');
+          avcx.textContent = "ORs: ";
+          infowincontent.appendChild(avcx);
+          infowincontent.appendChild(document.createElement('br'));
+
+          if (typeof(ins.ORs) != 'undefined'){
+            for (var i = 0; i < ins.ORs.length -1; i++){
+              var or = document.createElement('strong');
+              or.textContent = ins.ORs[i].name + ": ";
+              infowincontent.appendChild(or);
+
+              var orStatus = document.createElement('span');
+              orStatus.innerHTML= "status ";
+              infowincontent.appendChild(orStatus);
+
+              var sshOr = document.createElement('a');
+              sshOr.setAttribute('href', ins.ORs[i].ip);
+              sshOr.innerHTML= "ssh ";
+              infowincontent.appendChild(sshOr);
+
+              var vncOr = document.createElement('a');
+              vncOr.setAttribute('href', ins.ORs[i].ip);
+              vncOr.innerHTML= " vnc ";
+              infowincontent.appendChild(vncOr);
+
+              var confOr = document.createElement('a');
+              confOr.setAttribute('href', ins.ORs[i].ip);
+              confOr.innerHTML= " config ";
+              infowincontent.appendChild(confOr);
+             
+              infowincontent.appendChild(document.createElement('br'));
+            }
+          } else {
+            var orNa = document.createElement('span');
+            orNa.innerHTML= "NA";
+            infowincontent.appendChild(orNa);
+          }
+
+         return infowincontent;
+        }
+     }
+
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDbQfjSJcD1CaLuxWS_CBNRIE2zw9x2Uig&callback=initMap">
+    </script>
+  </body>
+</html>
